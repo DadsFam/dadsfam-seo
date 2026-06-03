@@ -148,7 +148,7 @@ $ajax_url   = admin_url( 'admin-ajax.php' );
 					<td>
 						<input type="text" name="dfseo_google_indexing_key" class="dfseo-input"
 							value="<?php echo esc_attr( $google_key ); ?>"
-							placeholder="AIzaSyBXvzP1J8eGP8kT3-Fbe-a5t-l_jbb43No">
+							placeholder="AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
 						<p class="dfseo-hint">💡 <?php esc_html_e( 'Paste your Google API key exactly as-is — it starts with AIzaSy. Get it from Google Cloud Console → Credentials → Create API Key, restricted to the Indexing API.', 'dadsfam-seo' ); ?></p>
 					</td>
 				</tr>
