@@ -3,7 +3,7 @@
 **Enterprise-grade SEO plugin for WordPress.**  
 On-page analysis, XML sitemaps, structured data, OpenGraph, AI-powered optimization, redirect manager, local SEO, analytics and more.
 
-**Version:** 1.4.6  
+**Version:** 1.4.7  
 **Author:** DadsFam  
 **Website:** [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
 
@@ -65,10 +65,15 @@ Love from South Africa 🇿🇦
 
 ### Changelog
 
-**1.4.6** (2026-06-03)
+**1.4.7** (2026-06-03)
+- Version bump to 1.4.7
+- Updated main plugin file with improved header and constants
+- Code cleanup and standardization
+- Minor improvements for better maintainability
+
+**1.4.6**
 - Initial public release on GitHub
 - Full plugin structure and files uploaded
-- Standardized main plugin file and documentation
 - Ready for WordPress.org submission
 
 ---
