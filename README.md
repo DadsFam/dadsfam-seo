@@ -5,7 +5,7 @@ On-page analysis, XML sitemaps, structured data, OpenGraph, AI-powered optimizat
 
 **Version:** 1.4.6  
 **Author:** DadsFam  
-**Website:** [dadsfam.co.za](https://www.dadsfam.co.za/plugins/dadsfam-seo)
+**Website:** [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
 
 ---
 
@@ -56,7 +56,7 @@ Thank you ❤️
 Love from South Africa 🇿🇦
 
 ### 🌐 Connect With Us
-- **Website**: [dadsfam.co.za](https://www.dadsfam.co.za)
+- **All Plugins**: [dadsfam.co.za/plugins](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
 - **Support**: socials@dadsfam.co.za
 - **X / Twitter**: [@DADSFAM](https://x.com/DADSFAM)
 - **GitHub**: [DadsFam](https://github.com/DadsFam)
@@ -78,4 +78,4 @@ GPLv2 or later
 
 ---
 
-Made with ❤️ by [DadsFam](https://www.dadsfam.co.za) — A South African Dad building tools for busy website owners.
+Made with ❤️ by [DadsFam](https://www.dadsfam.co.za/plugins-dadsfam-co-za/) — A South African Dad building tools for busy website owners.
