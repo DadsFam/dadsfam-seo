@@ -10,6 +10,319 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 <div class="dfseo-changelog">
 
+    <!-- ── v1.8.5 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.8.5</span>
+            <span class="dfseo-cl-date">23 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--fixed">Mobile Chart Fix</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>Runaway chart on mobile.</strong> The Analytics traffic graph could keep growing taller and taller, stretching the whole page down endlessly on phones. The chart now keeps a fixed width-to-height proportion, so its height is always based on the available width and can never spiral out of control.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.8.4 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.8.4</span>
+            <span class="dfseo-cl-date">22 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--fixed">Chart Fix</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>Analytics chart hanging / re-rendering.</strong> The traffic timeline was being torn down and rebuilt from scratch every time the page loaded or auto-refreshed, which caused the lag and the messy redraw. It is now created a single time and simply has its data swapped on refresh &mdash; so it shows up instantly and stays rock-steady.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.8.3 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.8.3</span>
+            <span class="dfseo-cl-date">21 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--fixed">Fixes</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>Invisible numbers in dark mode.</strong> The big stat values on the Analytics page (clicks, impressions, top engine, declining posts) were dark text on a dark card. They are now bright white and easy to read.</li>
+                    <li><strong>Laggy traffic chart.</strong> The timeline now animates quickly on first load and updates instantly when it auto-refreshes, so it feels snappy instead of hanging.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.8.2 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.8.2</span>
+            <span class="dfseo-cl-date">21 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--fixed">Dark Mode Fixes</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>Unreadable text in dark mode.</strong> Card and box headers had a light background, making their white titles invisible. Headers, analytics values, the 7/14/30/60/90-day buttons, and the search-engine bars now all have proper dark-mode contrast.</li>
+                    <li><strong>Health gauge showed as a square.</strong> The decorative glow layers behind the ring could render as a square in some browsers. The gauge is now a clean, crisp SVG circle with a soft glowing pulse instead.</li>
+                    <li><strong>Analytics chart hung on load.</strong> The traffic timeline used to half-render and only fix itself after a delay or resize. It now lives in a fixed-height container and draws instantly and correctly the first time.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.8.1 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.8.1</span>
+            <span class="dfseo-cl-date">20 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--improved">Whole-Plugin Dark</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--improved">Improved</span>
+                <ul>
+                    <li><strong>Dark mode now covers the entire plugin.</strong> Every page &mdash; Settings, Redirects, Analytics, Bulk Editor, License, Changelog and the setup wizard &mdash; gets the full dark treatment: glassmorphism cards, dark tables, forms, tabs, callouts and code blocks.</li>
+                    <li><strong>The animated aurora backdrop and cursor spotlight now follow you across every page</strong>, not just the dashboard, for a consistent premium feel throughout.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.8.0 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.8.0</span>
+            <span class="dfseo-cl-date">20 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Dark Mode + Gauge</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>Stunning dark mode.</strong> The entire plugin now has a gorgeous dark theme &mdash; deep navy radial background, glassmorphism cards, glowing accents &mdash; styled to match the DadsFam Login Security dashboard.</li>
+                    <li><strong>Light / Dark / Auto toggle.</strong> A sun-moon button in the header switches themes instantly. It follows your system (light or dark) setting by default and remembers your personal choice for next time.</li>
+                    <li><strong>Live SEO Health gauge.</strong> The dashboard now opens with a big animated circular gauge showing your overall SEO health from 0 to 100 &mdash; with a glowing ring that fills on load, a rotating sweep, a pulsing core, and a count-up number. Green when you are in great shape, amber when a few pages need love, red when it is time to optimise.</li>
+                    <li><strong>Animated aurora backdrop &amp; cursor spotlight</strong> on the dashboard for a premium, alive feel.</li>
+                    <li>Cards, tables, inputs and tabs all restyle cleanly in dark mode, and every animation respects reduced-motion.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.7.4 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.7.4</span>
+            <span class="dfseo-cl-date">19 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Live Analytics</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>The Analytics page is now alive.</strong> It refreshes itself every 45 seconds &mdash; no reloading needed &mdash; with a pulsing <strong>LIVE</strong> indicator that flashes on each update.</li>
+                    <li><strong>Numbers roll smoothly</strong> to their new values instead of snapping, so changes are easy to follow.</li>
+                    <li><strong>A beautiful glowing chart</strong> &mdash; the traffic timeline now has a soft amber gradient fill, a glowing line, smooth curves, an animated draw-in, and a polished dark tooltip.</li>
+                    <li><strong>Fluid engine bars</strong> &mdash; the &ldquo;Traffic by Search Engine&rdquo; bars now fill fluidly one after another with a moving sheen.</li>
+                    <li><strong>Animated aurora backdrop</strong> behind the whole page for a premium, dynamic feel.</li>
+                    <li>Auto-refresh pauses when the browser tab is hidden to save resources, and every animation respects reduced-motion.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.7.3 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.7.3</span>
+            <span class="dfseo-cl-date">19 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">3D UI + Fixes</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>3D dynamic cards.</strong> Dashboard and analytics cards now tilt in 3D toward your cursor with a moving holographic glare &mdash; a proper premium, interactive feel. Automatically disabled on touch screens and for reduced-motion users.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>&ldquo;Welcome / configure your settings&rdquo; notice kept coming back.</strong> It appears on every WordPress admin screen, but the dismiss only worked on the plugin&rsquo;s own pages. It now dismisses reliably anywhere, stays gone for good, and disappears automatically once you&rsquo;ve configured the plugin or finished the setup wizard.</li>
+                    <li><strong>Odd symbols in post titles.</strong> Titles with apostrophes or quotation marks were showing raw codes such as <code>&amp;#8217;</code> in the analytics tables. They now display correctly as real punctuation.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.7.2 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.7.2</span>
+            <span class="dfseo-cl-date">18 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Premium UI</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>A beautiful, fully animated interface.</strong> The whole admin experience got a premium glow-up: a living animated gradient header with a sweeping light sheen and floating logo, glassmorphism dashboard cards whose numbers count up and which lift with a glossy sheen on hover, glowing gradient pill tabs (settings and SEO box), gradient-text headings and stat numbers, a sliding indicator on the SEO-box tabs, and buttons with a light-sheen sweep and glow.</li>
+                    <li>Stat cards now carry colour-matched glows (green for great, red for poor) and rise in with a staggered entrance.</li>
+                    <li>Every animation automatically switches off for visitors who have reduced-motion enabled in their system settings.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.7.1 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.7.1</span>
+            <span class="dfseo-cl-date">18 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--improved">UI Polish</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>Premium animated interface</strong> &mdash; the settings and SEO-box tabs now have smooth gradient underline indicators that grow when active, soft hover fills, and a gentle lift. Cards rise on hover, buttons have tactile micro-interactions, and the page header carries a subtle animated gold accent line. All motion respects your system’s reduced-motion preference.</li>
+                    <li><strong>Easier GEO setup</strong> &mdash; the AI / GEO &ldquo;Site Summary&rdquo; field now has an <strong>Auto-fill from my site</strong> button and a clear plain-English example, so you never have to wonder what to type. Tap it, tweak it, done.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.7.0 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.7.0</span>
+            <span class="dfseo-cl-date">18 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Major Update &mdash; GEO</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New: AI / GEO</span>
+                <ul>
+                    <li><strong>Generative Engine Optimization (GEO)</strong> &mdash; a whole new <strong>AI / GEO</strong> settings tab dedicated to getting your content discovered and cited by AI answer engines: ChatGPT, Google AI Overviews, Perplexity, Gemini, Claude and Bing Copilot. As more people ask AI instead of searching Google, this is the next frontier of SEO &mdash; and almost no other WordPress plugin offers it yet.</li>
+                    <li><strong>llms.txt</strong> &mdash; the plugin now auto-generates and serves an AI content map at <code>/llms.txt</code> (the emerging llmstxt.org standard). Like robots.txt but for large language models, it gives AI a clean, curated markdown list of your pages and articles with descriptions, plus an optional site summary you control. Updates automatically as you publish.</li>
+                    <li><strong>AI crawler controls</strong> &mdash; decide exactly which AI bots may read your site, right from robots.txt. Allow all (to become citable in AI answers), block all (keep your content out of AI), or pick per-bot. Covers 13 major crawlers including OpenAI GPTBot, ClaudeBot, Google-Extended, PerplexityBot, Applebot, Meta AI, CCBot and Bytespider.</li>
+                    <li><strong>Speakable schema</strong> &mdash; marks your headline and opening paragraph as best suited to voice assistants and AI read-aloud, helping with voice search and AI summaries.</li>
+                    <li><strong>3 new GEO content checks</strong> in the SEO analysis &mdash; question-style headings, presence of lists/tables, and a concise direct-answer opening. These are exactly the patterns AI engines prefer to quote.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>Duplicate module load</strong> &mdash; the Instant Indexing module was being initialised twice, registering its hooks twice. Now loaded once.</li>
+                    <li><strong>AI model default</strong> &mdash; the fallback model name for new installs was outdated; corrected to the current model.</li>
+                    <li><strong>Smooth updates</strong> &mdash; the plugin now automatically refreshes its URL rules after an update, so new endpoints like <code>/llms.txt</code> work immediately without you having to re-save permalinks.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--improved">Verified</span>
+                <ul>
+                    <li>Full audit &mdash; all 51 PHP files and 3 JavaScript files pass syntax validation; the GEO crawler-directive engine was functionally tested; output escaped; uninstall cleans up all new options and caches.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.6.0 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.6.0</span>
+            <span class="dfseo-cl-date">15 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Major Update</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>Internal Link Suggestions (free)</strong> &mdash; a new <strong>Links</strong> tab in the SEO box on every post and product. Click &ldquo;Find Link Opportunities&rdquo; and DadsFam SEO scans your existing published content for related posts and pages you could link to, ranked by relevance to your focus keyword and title. It even shows which ones you&rsquo;ve already linked to. Internal linking is one of the strongest on-site ranking signals &mdash; this is the feature Link Whisper and Rank Math Pro charge for, and it&rsquo;s free here.</li>
+                    <li><strong>One-click copy</strong> &mdash; copy any suggested page&rsquo;s URL and paste it straight into your content where it fits.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--improved">Performance</span>
+                <ul>
+                    <li><strong>Sitemap caching</strong> &mdash; sitemaps are now cached server-side and regenerated automatically only when you publish, edit, or delete content. On larger sites this means Googlebot and Bing hit a cached file instead of running a fresh database query every time, noticeably reducing server load. The time-sensitive Google News sitemap is intentionally never cached so it always stays fresh.</li>
+                    <li>Smart cache invalidation &mdash; a single version flag busts every cached sitemap file at once the moment any content changes, so your sitemap is never stale.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Maintenance</span>
+                <ul>
+                    <li>Uninstall now fully cleans up the new sitemap-cache and Search-Console cache entries, leaving no orphaned data behind.</li>
+                    <li>Full re-audit &mdash; all 50 PHP files and 3 JavaScript files pass syntax validation; output escaped; no debug code or exposed keys.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.5.1 ──────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.5.1</span>
+            <span class="dfseo-cl-date">13 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Feature + Fixes</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>Auto-redirect on URL change (Premium)</strong> &mdash; when you change the slug or permalink of a published post or page, DadsFam SEO now automatically creates a 301 redirect from the old URL to the new one. Visitors and Google never hit a dead 404, and the old URL&rsquo;s ranking transfers to the new one. The same feature Yoast Premium and Rank Math charge for. Toggle under Settings &rarr; Advanced.</li>
+                    <li><strong>Smart redirect chain prevention</strong> &mdash; if you rename a URL more than once, older redirects are automatically repointed to the latest destination, so there are never redirect loops or chains that slow your site and confuse search engines.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--fixed">Fixed</span>
+                <ul>
+                    <li><strong>On-by-default toggles could not be switched off</strong> &mdash; settings checkboxes that default to on (redirect processing, 404 logging, analytics tracking, and more) were being deleted rather than set to off when unticked, so they silently reverted to on. They now save correctly in both directions.</li>
+                    <li><strong>Modernised search-engine notification</strong> &mdash; Google permanently shut down its sitemap ping endpoint in 2023 and Bing deprecated theirs in favour of IndexNow. The plugin was still calling those dead URLs on publish. It now notifies search engines through IndexNow instead (Bing, Yandex, DuckDuckGo, Seznam, Naver in a single call), while Google continues to pick up your sitemap automatically via Search Console.</li>
+                </ul>
+            </div>
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--improved">Verified</span>
+                <ul>
+                    <li>Full plugin audit &mdash; all 50 PHP files and 3 JavaScript files pass syntax validation, no debug code or exposed keys, output properly escaped, schema covers all major rich-result types (Article, Product, FAQ, HowTo, Video, Event, Organization, Breadcrumb, WebSite with sitelinks searchbox).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── v1.5.0 ──────────────────────────────────────────────────────────── -->
+    <div class="dfseo-cl-version">
+        <div class="dfseo-cl-header">
+            <span class="dfseo-cl-num">1.5.0</span>
+            <span class="dfseo-cl-date">12 June 2026</span>
+            <span class="dfseo-cl-tag dfseo-cl-tag--feature">Major Update</span>
+        </div>
+        <div class="dfseo-cl-body">
+            <div class="dfseo-cl-group">
+                <span class="dfseo-cl-label dfseo-cl-label--new">New</span>
+                <ul>
+                    <li><strong>REAL keyword data from Google Search Console</strong> &mdash; the Analytics page now shows the actual search terms people type into Google to find your site, with clicks, impressions, CTR, and average ranking position per keyword. This is the data no plugin can get from referrers (Google removed it in 2013) &mdash; it comes straight from the official Search Console API.</li>
+                    <li><strong>One credential, two features</strong> &mdash; uses the same Google service account JSON you already configure for Instant Indexing. Enable the &ldquo;Search Console API&rdquo; in Google Cloud, add the service account email as a user in Search Console, and keywords appear automatically.</li>
+                    <li><strong>Position colour-coding</strong> &mdash; keywords ranking in the top 10 show green, 11&ndash;20 amber, beyond grey &mdash; spot your best opportunities at a glance.</li>
+                    <li><strong>Follows the date range selector</strong> &mdash; 7/14/30/60/90 day keyword views, matching the rest of the Analytics dashboard.</li>
+                    <li><strong>Smart caching</strong> &mdash; results cached for 6 hours to stay well within Google API quotas while keeping the dashboard fast.</li>
+                    <li><strong>Domain-property aware</strong> &mdash; automatically tries sc-domain, www and non-www property formats so it finds your site however it was added to Search Console.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- ── v1.4.5 ──────────────────────────────────────────────────────────── -->
     <div class="dfseo-cl-version">
         <div class="dfseo-cl-header">

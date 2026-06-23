@@ -45,6 +45,9 @@
 			readability_transition:    'Transition words used',
 			readability_passive:       'Passive voice not overused',
 			readability_fleschkincaid: 'Flesch reading ease',
+			geo_question_heading:      '🤖 Question-style heading (AI-friendly)',
+			geo_has_list_or_table:     '🤖 Has list or table (AI-citable)',
+			geo_direct_answer:         '🤖 Direct answer in opening',
 		},
 
 		readabilityKeys: new Set([
@@ -61,6 +64,7 @@
 			this.bindAnalysisTriggers();
 			this.bindAnalyseButton();
 			this.bindAiTools();
+			this.bindLinkSuggestions();
 			this.initCharCounters();
 
 			// Auto-run analysis if focus keyword already set
@@ -195,6 +199,65 @@
 		bindAnalyseButton() {
 			$( document ).on( 'click', '#dfseo-run-analysis', () => {
 				this.runAnalysis();
+			});
+		},
+
+		// ── Internal link suggestions ──────────────────────────────────────
+		bindLinkSuggestions() {
+			$( document ).on( 'click', '#dfseo-find-links', () => {
+				const $box = $( '#dfseo-link-suggestions' );
+				const keyword = $( '#dfseo_focus_keyword' ).val().trim();
+				const title = $( '#dfseo_title' ).val().trim()
+					|| ( $( '#title' ).val() ? $( '#title' ).val().trim() : '' );
+
+				if ( ! keyword && ! title ) {
+					$box.html( '<p class="dfseo-muted" style="font-size:13px">' +
+						'Add a focus keyword (or post title) first, then search for link opportunities.</p>' );
+					return;
+				}
+
+				$box.html( '<p class="dfseo-muted" style="font-size:13px"><span class="dfseo-spinner"></span> Searching your content…</p>' );
+
+				$.ajax({
+					url: dfseoAdmin.restUrl + 'link-suggestions',
+					method: 'GET',
+					data: { post_id: dfseoAdmin.postId, keyword: keyword, title: title },
+					beforeSend( xhr ) { xhr.setRequestHeader( 'X-WP-Nonce', dfseoAdmin.restNonce ); }
+				}).done( ( data ) => {
+					const items = ( data && data.suggestions ) || [];
+					if ( ! items.length ) {
+						$box.html( '<p class="dfseo-muted" style="font-size:13px">No related published content found yet. As you publish more posts on similar topics, suggestions will appear here.</p>' );
+						return;
+					}
+					const rows = items.map( ( s ) => {
+						const linked = s.already_linked
+							? '<span style="font-size:11px;color:#16a34a;font-weight:700;white-space:nowrap">✓ already linked</span>'
+							: '<button type="button" class="dfseo-btn dfseo-btn-ghost dfseo-btn-sm dfseo-copy-link" data-url="' + s.url + '" style="white-space:nowrap">📋 Copy link</button>';
+						const matched = ( s.matched || [] ).slice( 0, 3 ).join( ', ' );
+						return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#f9fafb;border-radius:8px;margin-bottom:6px">'
+							+ '<div style="flex:1;min-width:0">'
+							+ '<a href="' + s.url + '" target="_blank" style="font-weight:600;font-size:13px;text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + $( '<span>' ).text( s.title ).html() + '</a>'
+							+ ( matched ? '<span style="font-size:11px;color:#9ca3af">matches: ' + $( '<span>' ).text( matched ).html() + '</span>' : '' )
+							+ '</div>' + linked + '</div>';
+					});
+					$box.html(
+						'<p class="dfseo-hint" style="margin:0 0 8px">' + items.length + ' related page(s) found. Copy a link and paste it into your content where relevant:</p>'
+						+ rows.join( '' )
+					);
+				}).fail( () => {
+					$box.html( '<p class="dfseo-muted" style="font-size:13px">Could not load suggestions. Please try again.</p>' );
+				});
+			});
+
+			// Copy link to clipboard
+			$( document ).on( 'click', '.dfseo-copy-link', function() {
+				const url = $( this ).data( 'url' );
+				const $btn = $( this );
+				navigator.clipboard.writeText( url ).then( () => {
+					const orig = $btn.html();
+					$btn.html( '✓ Copied!' );
+					setTimeout( () => $btn.html( orig ), 1500 );
+				});
 			});
 		},
 

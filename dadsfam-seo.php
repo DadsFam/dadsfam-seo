@@ -3,7 +3,7 @@
  * Plugin Name:       DadsFam SEO
  * Plugin URI:        https://www.dadsfam.co.za/plugins/dadsfsam-seo
  * Description:       Enterprise-grade SEO plugin for WordPress. On-page analysis, XML sitemaps, structured data, OpenGraph, AI-powered optimization, redirect manager, local SEO, analytics and more. Freemium with premium AI features.
- * Version:           1.4.7
+ * Version:           1.8.5
  * Author:            DadsFam
  * Author URI:        https://www.dadsfam.co.za
  * License:           GPL v2 or later
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-define( 'DFSEO_VERSION',      '1.4.7' );
+define( 'DFSEO_VERSION',      '1.8.5' );
 define( 'DFSEO_FILE',         __FILE__ );
 define( 'DFSEO_PATH',         plugin_dir_path( __FILE__ ) );
 define( 'DFSEO_URL',          plugin_dir_url( __FILE__ ) );

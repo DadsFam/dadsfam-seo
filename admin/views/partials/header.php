@@ -41,6 +41,11 @@ $_h_nav = [
 			</div>
 		</div>
 		<div class="dfseo-header-badges">
+			<button type="button" class="dfseo-theme-toggle" id="dfseo-theme-toggle" title="<?php esc_attr_e( 'Switch theme (auto / light / dark)', 'dadsfam-seo' ); ?>" aria-label="<?php esc_attr_e( 'Switch colour theme', 'dadsfam-seo' ); ?>">
+				<span class="dfseo-theme-ico dfseo-theme-ico-auto">🌗</span>
+				<span class="dfseo-theme-ico dfseo-theme-ico-light">☀️</span>
+				<span class="dfseo-theme-ico dfseo-theme-ico-dark">🌙</span>
+			</button>
 			<?php if ( $_h_premium ) : ?>
 				<span class="dfseo-chip dfseo-chip-pro">⭐ PRO</span>
 			<?php else : ?>

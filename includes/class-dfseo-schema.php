@@ -127,6 +127,8 @@ class DFSEO_Schema {
 		$title = $meta->get_page_title();
 		$desc  = $meta->get_meta_description();
 
+		$speakable = class_exists( 'DFSEO_GEO' ) ? DFSEO_GEO::speakable_node() : null;
+
 		return array_filter( [
 			'@context'        => 'https://schema.org',
 			'@type'           => $type,
@@ -138,6 +140,7 @@ class DFSEO_Schema {
 			'datePublished'   => mysql2date( 'c', $post->post_date_gmt, false ),
 			'dateModified'    => mysql2date( 'c', $post->post_modified_gmt, false ),
 			'inLanguage'      => get_locale(),
+			'speakable'       => $speakable,
 		] );
 	}
 

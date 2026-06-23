@@ -15,6 +15,10 @@ class DFSEO_Sitemap {
 	/** Posts per sitemap file (to stay under 50k URL limit) */
 	const POSTS_PER_SITEMAP = 1000;
 
+	/** Server-side cache: bumping the version option invalidates all cached files at once */
+	const CACHE_VERSION_OPT = 'dfseo_sitemap_cache_v';
+	const CACHE_TTL         = 12 * HOUR_IN_SECONDS;
+
 	public function __construct() {
 		// Disable WordPress core sitemap — ours replaces it completely
 		add_filter( 'wp_sitemaps_enabled', '__return_false' );
@@ -27,8 +31,24 @@ class DFSEO_Sitemap {
 		add_action( 'update_option_dfseo_sitemap_post_types',  [ $this, 'flush_rules' ] );
 		add_action( 'update_option_dfseo_sitemap_taxonomies',  [ $this, 'flush_rules' ] );
 
+		// Invalidate the cached sitemap whenever content changes
+		add_action( 'save_post',              [ __CLASS__, 'bust_cache' ] );
+		add_action( 'deleted_post',           [ __CLASS__, 'bust_cache' ] );
+		add_action( 'transition_post_status', [ __CLASS__, 'bust_cache' ] );
+
 		// Ping search engines on publish
 		add_action( 'publish_post', [ $this, 'ping_search_engines' ], 20 );
+	}
+
+	/** Bump the cache version → every cached sitemap file is treated as stale. */
+	public static function bust_cache(): void {
+		$v = (int) get_option( self::CACHE_VERSION_OPT, 1 );
+		update_option( self::CACHE_VERSION_OPT, $v + 1, false );
+	}
+
+	private function cache_key( string $type, int $page ): string {
+		$v = (int) get_option( self::CACHE_VERSION_OPT, 1 );
+		return 'dfseo_sm_' . $v . '_' . preg_replace( '/[^a-z0-9_-]/i', '', $type ) . '_' . $page;
 	}
 
 	// ─── Rewrite rules ──────────────────────────────────────────────────────
@@ -56,13 +76,25 @@ class DFSEO_Sitemap {
 		$type = (string) get_query_var( 'dfseo_sitemap' );
 		if ( empty( $type ) ) return;
 
-		// Cache control
-		nocache_headers();
 		header( 'X-Robots-Tag: noindex, follow', true );
 		header( 'Content-Type: text/xml; charset=' . get_bloginfo( 'charset' ) );
 
 		$page = max( 1, (int) get_query_var( 'dfseo_sitemap_page' ) ?: 1 );
 
+		// News is time-sensitive (48h window, posts age out) — never cache it.
+		$cacheable = ( $type !== 'news' );
+
+		if ( $cacheable ) {
+			$cache_key = $this->cache_key( $type, $page );
+			$cached    = get_transient( $cache_key );
+			if ( is_string( $cached ) && $cached !== '' ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — pre-built, already-escaped XML
+				echo $cached;
+				exit;
+			}
+		}
+
+		ob_start();
 		switch ( $type ) {
 			case 'index':    $this->render_index();             break;
 			case 'news':     $this->render_news_sitemap();      break;
@@ -73,6 +105,14 @@ class DFSEO_Sitemap {
 					$this->render_post_type_sitemap( $type, $page );
 				}
 		}
+		$output = ob_get_clean();
+
+		if ( $cacheable && ! empty( $output ) ) {
+			set_transient( $this->cache_key( $type, $page ), $output, self::CACHE_TTL );
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — pre-built, already-escaped XML
+		echo $output;
 		exit;
 	}
 
@@ -339,12 +379,26 @@ class DFSEO_Sitemap {
 
 	// ─── Ping ───────────────────────────────────────────────────────────────
 
-	public function ping_search_engines(): void {
+	/**
+	 * Notify search engines that content changed.
+	 *
+	 * Google permanently shut down its sitemap ping endpoint
+	 * (https://www.google.com/ping?sitemap=) in 2023, and Bing deprecated
+	 * its equivalent in favour of IndexNow. So instead of pinging dead URLs,
+	 * we submit the freshly published post through IndexNow — which instantly
+	 * notifies Bing, Yandex, DuckDuckGo, Seznam and every other IndexNow
+	 * participant. Google continues to discover the sitemap automatically via
+	 * Search Console (and the IndexNow auto-submit in the Indexing module).
+	 */
+	public function ping_search_engines( $post_id = 0 ): void {
 		if ( get_option( 'dfseo_ping_engines', '1' ) !== '1' ) return;
-		$sitemap = rawurlencode( home_url( '/sitemap.xml' ) );
-		// Google
-		wp_remote_get( "https://www.google.com/ping?sitemap={$sitemap}", [ 'timeout' => 5, 'blocking' => false ] );
-		// Bing
-		wp_remote_get( "https://www.bing.com/ping?sitemap={$sitemap}", [ 'timeout' => 5, 'blocking' => false ] );
+		if ( ! class_exists( 'DFSEO_Indexing' ) ) return;
+
+		$url = $post_id ? get_permalink( (int) $post_id ) : home_url( '/' );
+		if ( ! $url ) return;
+
+		$indexing = new DFSEO_Indexing();
+		// IndexNow covers Bing + Yandex + DuckDuckGo + Seznam + Naver in one call.
+		$indexing->submit_to_indexnow( $url );
 	}
 }

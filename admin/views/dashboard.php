@@ -19,11 +19,13 @@ $args = [
 $all_ids = ( new WP_Query( $args ) )->posts;
 
 $great = $ok = $poor = $no_kw = $total = 0;
+$score_sum = 0;
 $needs_attention = [];
 
 foreach ( $all_ids as $id ) {
 	$total++;
 	$score = (int) get_post_meta( $id, '_dfseo_score', true );
+	$score_sum += $score;
 	$kw    = get_post_meta( $id, '_dfseo_focus_keyword', true );
 	if ( ! $kw ) { $no_kw++; continue; }
 	if ( $score >= 80 )     $great++;
@@ -34,6 +36,18 @@ foreach ( $all_ids as $id ) {
 	}
 }
 
+// Overall SEO health score (0–100) — average of every post's score.
+$health = $total ? (int) round( $score_sum / $total ) : 100;
+if ( $health >= 80 ) {
+	$health_accent = '#34d399'; $health_status = __( 'Excellent — your SEO is in great shape', 'dadsfam-seo' );
+} elseif ( $health >= 50 ) {
+	$health_accent = '#f59e0b'; $health_status = __( 'Good — a few pages could use attention', 'dadsfam-seo' );
+} else {
+	$health_accent = '#ef4444'; $health_status = __( 'Needs work — let\'s optimise your content', 'dadsfam-seo' );
+}
+$health_circ   = 339.292;                                   // 2πr, r=54
+$health_offset = $health_circ * ( 1 - $health / 100 );
+
 usort( $needs_attention, fn( $a, $b ) => $a['score'] <=> $b['score'] );
 $needs_attention = array_slice( $needs_attention, 0, 10 );
 
@@ -42,6 +56,41 @@ $premium     = dfseo_is_premium();
 ?>
 <?php $dfseo_page = 'dashboard'; include DFSEO_PATH . 'admin/views/partials/header.php'; ?>
 <div class="wrap dfseo-wrap dfseo-wrap--with-header">
+
+	<!-- Hero: overall SEO health gauge -->
+	<div class="dfseo-hero dfseo-glass" style="--dfseo-accent:<?php echo esc_attr( $health_accent ); ?>">
+		<div class="dfseo-hero-label"><?php esc_html_e( 'LIVE SEO HEALTH', 'dadsfam-seo' ); ?></div>
+		<div class="dfseo-hero-main">
+			<div class="dfseo-gauge" style="--circ:<?php echo esc_attr( $health_circ ); ?>">
+				<svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+					<circle class="track" cx="60" cy="60" r="54"></circle>
+					<circle class="bar" cx="60" cy="60" r="54" data-offset="<?php echo esc_attr( $health_offset ); ?>"></circle>
+				</svg>
+				<div class="dfseo-gauge-center">
+					<span class="dfseo-gauge-num" data-count="<?php echo esc_attr( $health ); ?>">0</span>
+					<span class="dfseo-gauge-cap"><?php esc_html_e( 'HEALTH', 'dadsfam-seo' ); ?></span>
+				</div>
+			</div>
+			<div class="dfseo-hero-body">
+				<div class="dfseo-hero-status"><?php echo esc_html( $health_status ); ?></div>
+				<p class="dfseo-hero-sub">
+					<?php
+					printf(
+						/* translators: 1: great count, 2: total */
+						esc_html__( '%1$d of %2$d published items are well optimised. Keep your focus keywords set and scores above 80 to climb.', 'dadsfam-seo' ),
+						(int) $great, (int) $total
+					);
+					?>
+				</p>
+				<div class="dfseo-hero-mini">
+					<span class="dfseo-mini-stat"><strong><?php echo esc_html( $great ); ?></strong> <?php esc_html_e( 'great', 'dadsfam-seo' ); ?></span>
+					<span class="dfseo-mini-stat"><strong><?php echo esc_html( $ok ); ?></strong> <?php esc_html_e( 'ok', 'dadsfam-seo' ); ?></span>
+					<span class="dfseo-mini-stat"><strong><?php echo esc_html( $poor ); ?></strong> <?php esc_html_e( 'poor', 'dadsfam-seo' ); ?></span>
+					<a class="dfseo-hero-cta" href="<?php echo esc_url( $sitemap_url ); ?>" target="_blank">🗺️ <?php esc_html_e( 'View sitemap', 'dadsfam-seo' ); ?></a>
+				</div>
+			</div>
+		</div>
+	</div>
 
 
 	<!-- Health Overview -->

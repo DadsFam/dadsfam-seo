@@ -14,9 +14,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class DFSEO_Redirects {
 
+	/** @var array<int,string> old permalinks captured before a post update */
+	private $old_permalinks = [];
+
 	public function __construct() {
 		add_action( 'template_redirect', [ $this, 'process_redirects' ], 1 );
 		add_action( 'rest_api_init',     [ $this, 'register_rest' ] );
+
+		// Auto-redirect on slug/permalink change (premium) — capture before, compare after
+		add_action( 'pre_post_update', [ $this, 'capture_old_permalink' ], 10, 2 );
+		add_action( 'post_updated',    [ $this, 'maybe_create_slug_redirect' ], 10, 3 );
 	}
 
 	// ─── Process redirects ───────────────────────────────────────────────────
@@ -75,6 +82,97 @@ class DFSEO_Redirects {
 
 		wp_redirect( $redirect->target_url, $type );
 		exit;
+	}
+
+	// ─── Auto-redirect on slug change (premium) ──────────────────────────────
+
+	/**
+	 * Before a post is updated, remember its current permalink.
+	 * Runs on pre_post_update so the DB still holds the OLD slug.
+	 */
+	public function capture_old_permalink( int $post_id, $data = [] ): void {
+		if ( ! dfseo_is_premium() ) return;
+		if ( get_option( 'dfseo_auto_redirect_slug', '1' ) !== '1' ) return;
+
+		$post = get_post( $post_id );
+		if ( ! $post ) return;
+		if ( $post->post_status !== 'publish' ) return;            // only live URLs matter
+		if ( ! $this->is_redirectable_type( $post->post_type ) ) return;
+
+		$this->old_permalinks[ $post_id ] = get_permalink( $post_id );
+	}
+
+	/**
+	 * After update: if the permalink changed, create a 301 from old → new.
+	 */
+	public function maybe_create_slug_redirect( int $post_id, $post_after, $post_before ): void {
+		if ( ! dfseo_is_premium() ) return;
+		if ( get_option( 'dfseo_auto_redirect_slug', '1' ) !== '1' ) return;
+		if ( empty( $this->old_permalinks[ $post_id ] ) ) return;
+
+		// Both states must be published (don't redirect drafts or trashed posts)
+		if ( ! is_object( $post_after ) || $post_after->post_status !== 'publish' ) return;
+
+		$old_url = $this->old_permalinks[ $post_id ];
+		$new_url = get_permalink( $post_id );
+		if ( ! $old_url || ! $new_url || $old_url === $new_url ) return;
+
+		$old_path = $this->relative_path( $old_url );
+		$new_path = $this->relative_path( $new_url );
+		if ( ! $old_path || $old_path === $new_path || $old_path === '/' ) return;
+
+		global $wpdb;
+		$table = DFSEO_DB::table( 'redirects' );
+
+		// Skip if a redirect for this source already exists
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var( $wpdb->prepare(
+			"SELECT id FROM `{$table}` WHERE source_url = %s LIMIT 1", $old_path
+		) );
+		if ( $exists ) {
+			// Keep it fresh: point the existing rule at the new location
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->update( $table,
+				[ 'target_url' => $new_url, 'enabled' => 1, 'updated_at' => current_time( 'mysql' ) ],
+				[ 'id' => (int) $exists ]
+			);
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->insert( $table, [
+				'source_url'    => $old_path,
+				'target_url'    => $new_url,
+				'redirect_type' => 301,
+				'enabled'       => 1,
+				'note'          => sprintf(
+					/* translators: %s: post title */
+					__( 'Auto-created when the URL of "%s" changed', 'dadsfam-seo' ),
+					get_the_title( $post_id )
+				),
+				'created_at'    => current_time( 'mysql' ),
+				'updated_at'    => current_time( 'mysql' ),
+			] );
+		}
+
+		// Prevent redirect chains: if anything previously pointed AT the old URL,
+		// repoint it straight to the new URL.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( $wpdb->prepare(
+			"UPDATE `{$table}` SET target_url = %s, updated_at = %s WHERE target_url = %s OR target_url = %s",
+			$new_url, current_time( 'mysql' ), $old_url, $old_path
+		) );
+
+		unset( $this->old_permalinks[ $post_id ] );
+	}
+
+	private function is_redirectable_type( string $type ): bool {
+		$types = get_post_types( [ 'public' => true ] );
+		unset( $types['attachment'] );
+		return in_array( $type, $types, true );
+	}
+
+	private function relative_path( string $url ): string {
+		$path = wp_parse_url( $url, PHP_URL_PATH );
+		return is_string( $path ) ? $path : '';
 	}
 
 	// ─── 404 logging ────────────────────────────────────────────────────────

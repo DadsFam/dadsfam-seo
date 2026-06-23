@@ -49,6 +49,11 @@ class DFSEO_Analysis {
 		'readability_transition'   => 2,
 		'readability_passive'      => 2,
 		'readability_fleschkincaid'=> 3,
+
+		// GEO — citability in AI answer engines (ChatGPT, AI Overviews, Perplexity…)
+		'geo_question_heading'     => 3,
+		'geo_has_list_or_table'    => 2,
+		'geo_direct_answer'        => 3,
 	];
 
 	// Transition words (English) - improves readability score
@@ -82,6 +87,101 @@ class DFSEO_Analysis {
 				'content'         => [ 'type' => 'string',  'default'  => '' ],
 			],
 		] );
+
+		register_rest_route( 'dfseo/v1', '/link-suggestions', [
+			'methods'             => 'GET',
+			'callback'            => [ $this, 'rest_link_suggestions' ],
+			'permission_callback' => static fn() => current_user_can( 'edit_posts' ),
+			'args'                => [
+				'post_id' => [ 'type' => 'integer', 'required' => true ],
+				'keyword' => [ 'type' => 'string',  'default'  => '' ],
+				'title'   => [ 'type' => 'string',  'default'  => '' ],
+			],
+		] );
+	}
+
+	/**
+	 * Suggest existing published posts/pages to link to from the current post.
+	 * Relevance: focus keyword match > title-word overlap. Free feature.
+	 */
+	public function rest_link_suggestions( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = (int) $request['post_id'];
+		$keyword = sanitize_text_field( (string) $request['keyword'] );
+		$title   = sanitize_text_field( (string) $request['title'] );
+
+		// Build search terms from the focus keyword and title words.
+		$terms = [];
+		if ( $keyword !== '' ) $terms[] = $keyword;
+		if ( $title !== '' ) {
+			// pull meaningful words (4+ chars) from the title
+			$stop = [ 'the','and','for','with','your','from','that','this','have','how','what','why','when','will','best','are','you' ];
+			foreach ( preg_split( '/\s+/', strtolower( $title ) ) as $w ) {
+				$w = preg_replace( '/[^a-z0-9]/', '', $w );
+				if ( strlen( $w ) >= 4 && ! in_array( $w, $stop, true ) ) $terms[] = $w;
+			}
+		}
+		$terms = array_slice( array_unique( $terms ), 0, 6 );
+
+		if ( empty( $terms ) ) {
+			return new WP_REST_Response( [ 'suggestions' => [], 'reason' => 'no_terms' ], 200 );
+		}
+
+		// Current post permalink so we can detect existing links.
+		$current_content = (string) get_post_field( 'post_content', $post_id );
+
+		$scored = [];
+		$types  = array_values( get_post_types( [ 'public' => true ] ) );
+		unset( $types['attachment'] );
+
+		foreach ( $terms as $i => $term ) {
+			$q = new WP_Query( [
+				'post_type'           => $types,
+				'post_status'         => 'publish',
+				's'                   => $term,
+				'posts_per_page'      => 8,
+				'post__not_in'        => [ $post_id ],
+				'ignore_sticky_posts' => true,
+				'no_found_rows'       => true,
+				'orderby'             => 'relevance',
+			] );
+			foreach ( $q->posts as $p ) {
+				$url = get_permalink( $p->ID );
+				if ( ! isset( $scored[ $p->ID ] ) ) {
+					$already = ( $url && strpos( $current_content, $url ) !== false );
+					$scored[ $p->ID ] = [
+						'id'            => $p->ID,
+						'title'         => html_entity_decode( get_the_title( $p->ID ), ENT_QUOTES, 'UTF-8' ),
+						'url'           => $url,
+						'type'          => get_post_type( $p->ID ),
+						'already_linked'=> $already,
+						'score'         => 0,
+						'matched'       => [],
+					];
+				}
+				// earlier terms (focus keyword first) weigh more
+				$scored[ $p->ID ]['score'] += ( 10 - $i );
+				$scored[ $p->ID ]['matched'][] = $term;
+			}
+			wp_reset_postdata();
+		}
+
+		// Sort: not-yet-linked first, then by score
+		usort( $scored, static function ( $a, $b ) {
+			if ( $a['already_linked'] !== $b['already_linked'] ) {
+				return $a['already_linked'] ? 1 : -1;
+			}
+			return $b['score'] <=> $a['score'];
+		} );
+
+		$out = array_slice( array_values( $scored ), 0, 8 );
+		foreach ( $out as &$o ) {
+			$o['matched'] = array_values( array_unique( $o['matched'] ) );
+		}
+
+		return new WP_REST_Response( [
+			'suggestions' => $out,
+			'terms'       => $terms,
+		], 200 );
 	}
 
 	public function rest_analyse( WP_REST_Request $request ): WP_REST_Response {
@@ -147,7 +247,7 @@ class DFSEO_Analysis {
 				'kw', 'has_kw', 'plain_title', 'plain_desc', 'plain_url',
 				'plain_content', 'word_count', 'sentences', 'paragraphs',
 				'h1s', 'h2s', 'h3s', 'imgs', 'links',
-				'first_para', 'seo_title', 'seo_desc', 'focus_kw'
+				'first_para', 'seo_title', 'seo_desc', 'focus_kw', 'dom'
 			) );
 			$checks[ $id ] = $result;
 			$total_w += $weight;
@@ -478,6 +578,58 @@ class DFSEO_Analysis {
 				elseif ( $fk >= 30 )  { $score = 0.6; $msg = sprintf( __( 'Flesch Reading Ease: %.0f — moderately difficult. Simplify sentence structure.', 'dadsfam-seo' ), $fk ); }
 				else                  { $score = 0.2; $msg = sprintf( __( 'Flesch Reading Ease: %.0f — very difficult to read. Shorten sentences and use simpler words.', 'dadsfam-seo' ), $fk ); }
 				$result = [ 'id' => $id, 'score' => $score * $weight, 'weight' => $weight, 'status' => $this->score_to_status( $score ), 'message' => $msg ];
+				break;
+
+			// ── GEO checks ──────────────────────────────────────────────────
+			case 'geo_question_heading':
+				$found = false;
+				foreach ( [ $d['h2s'], $d['h3s'] ] as $nodelist ) {
+					if ( ! $nodelist ) continue;
+					foreach ( $nodelist as $h ) {
+						$t = strtolower( trim( $h->textContent ) );
+						if ( $t === '' ) continue;
+						// question mark, or starts with an interrogative word
+						if ( strpos( $t, '?' ) !== false
+							|| preg_match( '/^(what|how|why|when|where|who|which|can|does|is|are|should|do)\b/', $t ) ) {
+							$found = true; break 2;
+						}
+					}
+				}
+				$result = $this->check( $id, $weight, $found,
+					$found
+						? __( 'Has a question-style heading — AI answer engines love these.', 'dadsfam-seo' )
+						: __( 'Add a question-style heading (e.g. "What is…?", "How do I…?"). AI engines pull answers from question-shaped sections.', 'dadsfam-seo' )
+				);
+				break;
+
+			case 'geo_has_list_or_table':
+				$has = false;
+				if ( $d['dom'] instanceof DOMDocument ) {
+					foreach ( [ 'ul', 'ol', 'table' ] as $tag ) {
+						if ( $d['dom']->getElementsByTagName( $tag )->length > 0 ) { $has = true; break; }
+					}
+				}
+				$result = $this->check( $id, $weight, $has,
+					$has
+						? __( 'Contains a list or table — structured data is highly citable by AI.', 'dadsfam-seo' )
+						: __( 'Add a bulleted list, numbered steps, or a comparison table. AI Overviews and Perplexity frequently quote structured content.', 'dadsfam-seo' )
+				);
+				break;
+
+			case 'geo_direct_answer':
+				// First paragraph should be a concise, self-contained answer (≤ ~360 chars)
+				$intro = trim( $d['first_para'] ?? '' );
+				$len   = mb_strlen( $intro );
+				if ( $len === 0 ) {
+					$result = $this->check( $id, $weight, false,
+						__( 'Open with a short, direct answer in the first paragraph — AI engines quote concise opening summaries.', 'dadsfam-seo' ) );
+				} elseif ( $len <= 360 ) {
+					$result = $this->check( $id, $weight, true,
+						__( 'Opens with a concise, quotable answer — ideal for AI citations.', 'dadsfam-seo' ) );
+				} else {
+					$result = [ 'id' => $id, 'score' => 0.5 * $weight, 'weight' => $weight, 'status' => 'ok',
+						'message' => __( 'Your opening paragraph is long. A tight 2–3 sentence summary up top is easier for AI engines to quote.', 'dadsfam-seo' ) ];
+				}
 				break;
 
 			default:

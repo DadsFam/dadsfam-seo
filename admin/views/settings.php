@@ -15,6 +15,7 @@ $tabs    = [
 	'sitemap'  => __( 'Sitemap', 'dadsfam-seo' ),
 	'schema'   => __( 'Schema', 'dadsfam-seo' ),
 	'advanced' => __( 'Advanced', 'dadsfam-seo' ),
+	'geo'      => '🤖 ' . __( 'AI / GEO', 'dadsfam-seo' ),
 	'indexing' => '📡 ' . __( 'Instant Indexing', 'dadsfam-seo' ),
 	'ai'       => __( 'AI Tools', 'dadsfam-seo' ),
 	'local'    => __( 'Local SEO 🔒', 'dadsfam-seo' ),

@@ -67,6 +67,14 @@
 				<p class="dfseo-hint">💡 <?php esc_html_e( 'Keeps a log of all broken URLs visitors and Google hit. View them under Redirects → 404 Log (Premium) and create redirects with one click. Recommended: on.', 'dadsfam-seo' ); ?></p>
 			</td>
 		</tr>
+		<tr>
+			<th><?php esc_html_e( 'Auto-Redirect on URL Change', 'dadsfam-seo' ); ?> <span class="dfseo-badge-pro" style="background:#fef3c7;color:#d97706;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700">⭐ PREMIUM</span></th>
+			<td>
+				<label class="dfseo-check-label"><input type="checkbox" name="dfseo_auto_redirect_slug" value="1" <?php checked( get_option( 'dfseo_auto_redirect_slug', '1' ), '1' ); ?>>
+				<?php esc_html_e( 'Automatically create a 301 redirect when a published post or page URL changes', 'dadsfam-seo' ); ?></label>
+				<p class="dfseo-hint">💡 <?php esc_html_e( 'If you edit the slug of a live post, the old URL would normally 404 and lose its Google ranking. With this on, DadsFam SEO instantly creates a 301 redirect from the old URL to the new one — so visitors and search engines never hit a dead link, and your ranking transfers. This is the same feature Yoast and Rank Math charge premium for. Recommended: on.', 'dadsfam-seo' ); ?></p>
+			</td>
+		</tr>
 	</table>
 
 	<h2><?php esc_html_e( 'Custom robots.txt', 'dadsfam-seo' ); ?></h2>

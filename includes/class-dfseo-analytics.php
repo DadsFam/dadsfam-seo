@@ -124,7 +124,7 @@ class DFSEO_Analytics {
 			$days
 		), ARRAY_A );
 		foreach ( $top_posts as &$p ) {
-			$p['title'] = get_the_title( (int) $p['post_id'] ) ?: __( '(Untitled)', 'dadsfam-seo' );
+			$p['title'] = html_entity_decode( get_the_title( (int) $p['post_id'] ), ENT_QUOTES, 'UTF-8' ) ?: __( '(Untitled)', 'dadsfam-seo' );
 			$p['url']   = get_permalink( (int) $p['post_id'] );
 		}
 
@@ -154,7 +154,7 @@ class DFSEO_Analytics {
 				if ( $change < -30 ) {
 					$decay[] = [
 						'post_id' => $row['post_id'],
-						'title'   => get_the_title( (int) $row['post_id'] ) ?: '(Untitled)',
+						'title'   => html_entity_decode( get_the_title( (int) $row['post_id'] ), ENT_QUOTES, 'UTF-8' ) ?: '(Untitled)',
 						'url'     => get_permalink( (int) $row['post_id'] ),
 						'current' => (int) $row['clicks'],
 						'prev'    => $prev_clicks,

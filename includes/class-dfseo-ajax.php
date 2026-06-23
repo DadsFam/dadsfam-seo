@@ -72,6 +72,11 @@ class DFSEO_Ajax {
 		if ( ! check_ajax_referer( 'dfseo_meta_box', 'nonce', false ) ) wp_send_json_error();
 		$notice = sanitize_key( $_POST['notice'] ?? '' );
 		update_user_meta( get_current_user_id(), "dfseo_dismissed_{$notice}", 1 );
+		// The welcome notice is global (shows on every admin page), so also store
+		// a site-wide flag — this guarantees it never reappears for anyone.
+		if ( $notice === 'welcome' ) {
+			update_option( 'dfseo_welcome_dismissed', 1, false );
+		}
 		wp_send_json_success();
 	}
 

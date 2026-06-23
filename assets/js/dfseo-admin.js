@@ -510,3 +510,237 @@
 	window.dfSEO = dfSEO;
 
 })( jQuery );
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ✨ Premium UI behaviours (v1.7.2): count-up stat numbers + animated
+   sliding indicator on the SEO meta-box tabs. Pure vanilla, respects
+   prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════════════════ */
+( function () {
+	'use strict';
+	var reduce = window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+
+	function ready( fn ) {
+		if ( document.readyState !== 'loading' ) { fn(); }
+		else { document.addEventListener( 'DOMContentLoaded', fn ); }
+	}
+
+	// ── Count-up the big dashboard stat numbers ────────────────────────────
+	function countUp() {
+		var nums = document.querySelectorAll( '.dfseo-card-num' );
+		if ( ! nums.length ) return;
+		nums.forEach( function ( el ) {
+			var target = parseInt( ( el.textContent || '' ).replace( /[^0-9]/g, '' ), 10 );
+			if ( isNaN( target ) ) return;
+			if ( reduce || target === 0 ) { el.textContent = target; return; }
+			el.classList.add( 'dfx-counting' );
+			var dur = 900, start = null;
+			function step( ts ) {
+				if ( ! start ) start = ts;
+				var p = Math.min( ( ts - start ) / dur, 1 );
+				// easeOutCubic
+				var eased = 1 - Math.pow( 1 - p, 3 );
+				el.textContent = Math.round( eased * target );
+				if ( p < 1 ) { requestAnimationFrame( step ); }
+				else { el.textContent = target; }
+			}
+			requestAnimationFrame( step );
+		} );
+	}
+
+	// ── Sliding glow indicator for the SEO meta-box tabs ───────────────────
+	function metaTabSlider() {
+		var nav = document.querySelector( '.dfseo-tab-nav' );
+		if ( ! nav ) return;
+		var tabs = nav.querySelectorAll( '.dfseo-tab' );
+		if ( ! tabs.length ) return;
+
+		var ind = document.createElement( 'span' );
+		ind.className = 'dfseo-tab-indicator';
+		ind.style.cssText = 'position:absolute;bottom:0;height:100%;border-radius:10px;'
+			+ 'background:linear-gradient(135deg,rgba(245,158,11,.16),rgba(217,119,6,.10));'
+			+ 'z-index:0;transition:' + ( reduce ? 'none' : 'left .35s cubic-bezier(.16,1,.3,1),width .35s cubic-bezier(.16,1,.3,1)' ) + ';pointer-events:none;';
+		if ( getComputedStyle( nav ).position === 'static' ) { nav.style.position = 'relative'; }
+		nav.insertBefore( ind, nav.firstChild );
+
+		function move( el ) {
+			if ( ! el ) return;
+			ind.style.left  = el.offsetLeft + 'px';
+			ind.style.width = el.offsetWidth + 'px';
+		}
+		function active() { return nav.querySelector( '.dfseo-tab.active' ) || tabs[0]; }
+
+		move( active() );
+		tabs.forEach( function ( t ) {
+			t.addEventListener( 'mouseenter', function () { move( t ); } );
+			t.addEventListener( 'click', function () { setTimeout( function () { move( active() ); }, 10 ); } );
+		} );
+		nav.addEventListener( 'mouseleave', function () { move( active() ); } );
+		window.addEventListener( 'resize', function () { move( active() ); } );
+	}
+
+	ready( function () {
+		countUp();
+		metaTabSlider();
+	} );
+} )();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ✨ 3D dynamic card tilt (v1.7.3) — cards tilt toward the cursor with a
+   holographic glare. Pointer-based, disabled on touch & reduced-motion.
+   ═══════════════════════════════════════════════════════════════════════════ */
+( function () {
+	'use strict';
+	var reduce = window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+	var fine   = window.matchMedia && window.matchMedia( '(pointer: fine)' ).matches;
+	if ( reduce || ! fine ) return;   // no tilt on touch screens or reduced-motion
+
+	function ready( fn ) {
+		if ( document.readyState !== 'loading' ) { fn(); }
+		else { document.addEventListener( 'DOMContentLoaded', fn ); }
+	}
+
+	var MAX = 9; // degrees
+
+	function enableTilt( el ) {
+		el.style.transformStyle = 'preserve-3d';
+		el.style.willChange = 'transform';
+
+		// glare layer
+		var glare = document.createElement( 'span' );
+		glare.className = 'dfx-glare';
+		glare.style.cssText = 'position:absolute;inset:0;border-radius:inherit;pointer-events:none;'
+			+ 'opacity:0;transition:opacity .3s ease;z-index:2;'
+			+ 'background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.35), transparent 45%);';
+		if ( getComputedStyle( el ).position === 'static' ) { el.style.position = 'relative'; }
+		if ( getComputedStyle( el ).overflow !== 'hidden' ) { el.style.overflow = 'hidden'; }
+		el.appendChild( glare );
+
+		var raf = null;
+		function onMove( e ) {
+			var r = el.getBoundingClientRect();
+			var px = ( e.clientX - r.left ) / r.width;   // 0..1
+			var py = ( e.clientY - r.top ) / r.height;   // 0..1
+			var rx = ( 0.5 - py ) * MAX * 2;
+			var ry = ( px - 0.5 ) * MAX * 2;
+			if ( raf ) cancelAnimationFrame( raf );
+			raf = requestAnimationFrame( function () {
+				el.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-6px) scale(1.03)';
+				glare.style.opacity = '1';
+				glare.style.background = 'radial-gradient(circle at ' + ( px * 100 ).toFixed(0) + '% ' + ( py * 100 ).toFixed(0) + '%, rgba(255,255,255,.45), transparent 45%)';
+			} );
+		}
+		function onLeave() {
+			if ( raf ) cancelAnimationFrame( raf );
+			el.style.transition = 'transform .5s cubic-bezier(.16,1,.3,1)';
+			el.style.transform = '';
+			glare.style.opacity = '0';
+			setTimeout( function () { el.style.transition = ''; }, 500 );
+		}
+		el.addEventListener( 'mousemove', onMove );
+		el.addEventListener( 'mouseleave', onLeave );
+	}
+
+	ready( function () {
+		var cards = document.querySelectorAll( '.dfseo-card, .dfseo-analytics-card' );
+		cards.forEach( enableTilt );
+	} );
+} )();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🌗 Theme system + health gauge + cursor spotlight (v1.8.0)
+   ═══════════════════════════════════════════════════════════════════════════ */
+( function () {
+	'use strict';
+	var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	function ready( fn ){ if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+	function prefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+
+	var body = document.body;
+
+	// Resolve the chosen mode (auto|light|dark) into an effective dark/light theme.
+	function applyEffective( mode ) {
+		body.classList.remove(
+			'dfseo-mode-auto','dfseo-mode-light','dfseo-mode-dark',
+			'dfseo-theme-dark','dfseo-theme-light'
+		);
+		body.classList.add('dfseo-mode-' + mode);            // drives the icon
+		var dark = (mode === 'dark') || (mode === 'auto' && prefersDark());
+		body.classList.add(dark ? 'dfseo-theme-dark' : 'dfseo-theme-light');  // drives styling
+	}
+
+	var order = ['auto','light','dark'];
+	var current = (window.dfseoAdmin && dfseoAdmin.theme) || 'auto';
+
+	ready( function () {
+		applyEffective( current );
+
+		// React to OS theme changes while in auto
+		if (window.matchMedia) {
+			var mq = window.matchMedia('(prefers-color-scheme: dark)');
+			var onChange = function(){ if (current === 'auto') applyEffective('auto'); };
+			if (mq.addEventListener) mq.addEventListener('change', onChange);
+			else if (mq.addListener) mq.addListener(onChange);
+		}
+
+		// Toggle: cycle auto → light → dark
+		var btn = document.getElementById('dfseo-theme-toggle');
+		if (btn) {
+			btn.addEventListener('click', function () {
+				current = order[ (order.indexOf(current) + 1) % order.length ];
+				applyEffective( current );
+				if (window.dfseoAdmin && dfseoAdmin.ajaxUrl) {
+					var x = new XMLHttpRequest();
+					x.open('POST', dfseoAdmin.ajaxUrl);
+					x.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+					x.send('action=dfseo_set_theme&theme=' + encodeURIComponent(current) + '&nonce=' + encodeURIComponent(dfseoAdmin.nonce));
+				}
+			});
+		}
+
+		// Inject the aurora + spotlight backdrop once, on every plugin page.
+		if ( ! document.querySelector('.dfseo-aurora') ) {
+			var aur = document.createElement('div');
+			aur.className = 'dfseo-aurora'; aur.setAttribute('aria-hidden','true');
+			aur.innerHTML = '<i></i><i></i><i></i>';
+			document.body.appendChild(aur);
+		}
+		var spot = document.getElementById('dfseo-spot');
+		if ( ! spot ) {
+			spot = document.createElement('div');
+			spot.className = 'dfseo-spot'; spot.id = 'dfseo-spot'; spot.setAttribute('aria-hidden','true');
+			document.body.appendChild(spot);
+		}
+
+		// Health gauge: animate the ring + count up the number
+		var bar = document.querySelector('.dfseo-gauge .bar');
+		if (bar) {
+			var off = bar.getAttribute('data-offset');
+			if (reduce) { bar.style.strokeDashoffset = off; }
+			else { setTimeout(function(){ bar.style.strokeDashoffset = off; }, 150); }
+		}
+		var numEl = document.querySelector('.dfseo-gauge-num');
+		if (numEl) {
+			var target = parseInt(numEl.getAttribute('data-count'), 10) || 0;
+			if (reduce) { numEl.textContent = target; }
+			else {
+				var dur = 1600, start = null;
+				(function step(ts){
+					if (!start) start = ts;
+					var p = Math.min((ts - start) / dur, 1);
+					numEl.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+					if (p < 1) requestAnimationFrame(step); else numEl.textContent = target;
+				})(performance.now());
+			}
+		}
+
+		// Cursor spotlight — tracks across the whole plugin page
+		if (spot && !reduce) {
+			document.addEventListener('mousemove', function (e) {
+				spot.style.setProperty('--mx', e.clientX + 'px');
+				spot.style.setProperty('--my', e.clientY + 'px');
+			});
+		}
+	} );
+} )();

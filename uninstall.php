@@ -96,6 +96,20 @@ $options = [
 	'dfseo_local_lng',
 	// Crons
 	'dfseo_sitemap_last_ping',
+	// Sitemap cache + auto-redirect + GSC
+	'dfseo_sitemap_cache_v',
+	'dfseo_auto_redirect_slug',
+	'dfseo_google_indexing_key',
+	// GEO
+	'dfseo_geo_llms_enable',
+	'dfseo_geo_llms_summary',
+	'dfseo_geo_llms_post_count',
+	'dfseo_geo_ai_control',
+	'dfseo_geo_ai_mode',
+	'dfseo_geo_ai_blocked',
+	'dfseo_geo_speakable',
+	'dfseo_welcome_dismissed',
+	'dfseo_settings_saved_once',
 ];
 
 foreach ( $options as $option ) {
@@ -104,6 +118,17 @@ foreach ( $options as $option ) {
 
 // ─── Delete transients ────────────────────────────────────────────────────────
 delete_transient( 'dfseo_license_status' );
+delete_transient( 'dfseo_llms_txt_cache' );
+
+// Sweep cached sitemap files + GSC caches (transient names are versioned/dynamic)
+global $wpdb;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+$wpdb->query(
+	"DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_dfseo_sm_%'
+	 OR option_name LIKE '_transient_timeout_dfseo_sm_%'
+	 OR option_name LIKE '_transient_dfseo_gsc_%'
+	 OR option_name LIKE '_transient_timeout_dfseo_gsc_%'"
+);
 
 // ─── Clean up post meta (optional — only if you want a full wipe) ────────────
 // Uncomment the block below to also delete all SEO meta from posts on uninstall.
@@ -128,3 +153,7 @@ foreach ( [ 'dfseo_license_cron', 'dfseo_daily_cron', 'dfseo_cleanup_404_log', '
 		wp_unschedule_event( $timestamp, $event );
 	}
 }
+
+// ─── Clean up per-user meta ───────────────────────────────────────────────────
+global $wpdb;
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key IN ('dfseo_admin_theme','dfseo_dismissed_welcome')" );

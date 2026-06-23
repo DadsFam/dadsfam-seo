@@ -32,6 +32,22 @@ final class DFSEO_Core {
 	private function __construct() {
 		$this->includes();
 		$this->init_hooks();
+		add_action( 'admin_init', [ $this, 'maybe_upgrade' ] );
+	}
+
+	/**
+	 * Runs on admin_init. When the stored version differs from the running
+	 * version (i.e. just after a plugin update), flush rewrite rules once so
+	 * new endpoints like /llms.txt start working without the user having to
+	 * manually re-save permalinks.
+	 */
+	public function maybe_upgrade(): void {
+		$stored = get_option( 'dfseo_version', '' );
+		if ( $stored === DFSEO_VERSION ) return;
+
+		flush_rewrite_rules();
+		DFSEO_DB::create_tables();          // ensure any new tables/columns exist
+		update_option( 'dfseo_version', DFSEO_VERSION );
 	}
 
 	private function __clone() {}
@@ -43,6 +59,7 @@ final class DFSEO_Core {
 	public DFSEO_Schema   $schema;
 	public DFSEO_Opengraph $opengraph;
 	public DFSEO_Robots   $robots;
+	public DFSEO_GEO      $geo;
 	public DFSEO_Breadcrumbs $breadcrumbs;
 	public DFSEO_Analysis $analysis;
 	public DFSEO_License  $license;
@@ -63,6 +80,7 @@ final class DFSEO_Core {
 		require_once DFSEO_PATH . 'includes/class-dfseo-schema.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-opengraph.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-robots.php';
+		require_once DFSEO_PATH . 'includes/class-dfseo-geo.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-breadcrumbs.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-image-seo.php';
 
@@ -70,6 +88,7 @@ final class DFSEO_Core {
 		require_once DFSEO_PATH . 'includes/class-dfseo-ai.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-redirects.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-analytics.php';
+		require_once DFSEO_PATH . 'includes/class-dfseo-gsc.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-local-seo.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-bulk-edit.php';
 		require_once DFSEO_PATH . 'includes/class-dfseo-import.php';
@@ -107,11 +126,11 @@ final class DFSEO_Core {
 		$this->schema      = new DFSEO_Schema();
 		$this->opengraph   = new DFSEO_Opengraph();
 		$this->robots      = new DFSEO_Robots();
+		$this->geo         = new DFSEO_GEO();
 		$this->breadcrumbs = new DFSEO_Breadcrumbs();
 		$this->analysis    = new DFSEO_Analysis();
 		$this->image_seo   = new DFSEO_Image_Seo();
 		$this->ajax        = new DFSEO_Ajax();
-		new DFSEO_Indexing();
 		new DFSEO_Indexing();
 		new DFSEO_RSS();
 
@@ -119,6 +138,7 @@ final class DFSEO_Core {
 		new DFSEO_AI();
 		new DFSEO_Redirects();
 		new DFSEO_Analytics();
+		new DFSEO_GSC();
 		new DFSEO_Local_Seo();
 		new DFSEO_Bulk_Edit();
 		new DFSEO_Import();
@@ -176,7 +196,7 @@ final class DFSEO_Core {
 			'dfseo_redirect_enable'        => '1',
 			'dfseo_track_404'              => '1',
 			'dfseo_ai_api_key'             => '',
-			'dfseo_ai_model'               => 'claude-sonnet-4-20250514',
+			'dfseo_ai_model'               => 'claude-sonnet-4-6',
 			'dfseo_installed_at'           => current_time( 'mysql' ),
 			'dfseo_version'                => DFSEO_VERSION,
 		];

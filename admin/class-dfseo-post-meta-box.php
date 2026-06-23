@@ -125,6 +125,9 @@ class DFSEO_Post_Meta_Box {
 					<button role="tab" aria-selected="false" class="dfseo-tab" data-tab="advanced">
 						<span class="dashicons dashicons-admin-tools"></span> <?php esc_html_e( 'Advanced', 'dadsfam-seo' ); ?>
 					</button>
+					<button role="tab" aria-selected="false" class="dfseo-tab" data-tab="links">
+						<span class="dashicons dashicons-admin-links"></span> <?php esc_html_e( 'Links', 'dadsfam-seo' ); ?>
+					</button>
 					<?php if ( $premium ) : ?>
 					<button role="tab" aria-selected="false" class="dfseo-tab" data-tab="schema">
 						<span class="dashicons dashicons-schema"></span> <?php esc_html_e( 'Schema', 'dadsfam-seo' ); ?>
@@ -194,6 +197,29 @@ class DFSEO_Post_Meta_Box {
 				<div class="dfseo-tab-content" id="dfseo-tab-readability" style="display:none">
 					<div class="dfseo-readability-summary" id="dfseo-readability-summary">
 						<p class="dfseo-muted"><?php esc_html_e( 'Run an analysis to see readability results.', 'dadsfam-seo' ); ?></p>
+					</div>
+				</div>
+
+				<!-- Tab: Links (internal link suggestions) -->
+				<div class="dfseo-tab-content" id="dfseo-tab-links" style="display:none">
+					<div class="dfseo-field-group">
+						<label class="dfseo-label">
+							<?php esc_html_e( 'Internal Link Suggestions', 'dadsfam-seo' ); ?>
+							<span class="dfseo-help" data-tip="<?php esc_attr_e( 'Existing published content on your site related to this post. Linking between related posts is one of the strongest on-site SEO signals — it spreads ranking authority and helps Google understand your site structure.', 'dadsfam-seo' ); ?>">?</span>
+						</label>
+						<p class="dfseo-hint" style="margin-top:0">
+							<?php esc_html_e( 'Related posts and pages you could link to from this content. Internal linking spreads ranking power and helps Google discover and understand your pages.', 'dadsfam-seo' ); ?>
+						</p>
+						<button type="button" class="dfseo-btn dfseo-btn-secondary" id="dfseo-find-links">
+							🔗 <?php esc_html_e( 'Find Link Opportunities', 'dadsfam-seo' ); ?>
+						</button>
+						<div id="dfseo-link-suggestions" style="margin-top:14px"></div>
+					</div>
+					<div class="dfseo-field-group" style="border-top:1px solid var(--df-gray-200,#e5e7eb);padding-top:14px;margin-top:6px">
+						<label class="dfseo-label"><?php esc_html_e( 'Links in this content', 'dadsfam-seo' ); ?></label>
+						<div id="dfseo-link-counts" class="dfseo-muted" style="font-size:13px">
+							<?php esc_html_e( 'Run an analysis (General tab) to count internal and external links.', 'dadsfam-seo' ); ?>
+						</div>
 					</div>
 				</div>
 

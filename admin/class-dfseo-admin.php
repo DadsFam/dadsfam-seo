@@ -17,6 +17,34 @@ class DFSEO_Admin {
 		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
 		add_filter( 'plugin_action_links_' . DFSEO_BASENAME, [ $this, 'plugin_action_links' ] );
 		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
+		add_filter( 'admin_body_class', [ $this, 'add_theme_body_class' ] );
+		add_action( 'wp_ajax_dfseo_set_theme', [ $this, 'ajax_set_theme' ] );
+	}
+
+	/** The admin colour theme for the current user: auto | light | dark. */
+	public static function current_theme(): string {
+		$t = get_user_meta( get_current_user_id(), 'dfseo_admin_theme', true );
+		return in_array( $t, [ 'auto', 'light', 'dark' ], true ) ? $t : 'auto';
+	}
+
+	/** Add theme classes to the admin body on plugin pages. */
+	public function add_theme_body_class( string $classes ): string {
+		$mode = self::current_theme();          // auto | light | dark
+		$classes .= ' dfseo-mode-' . $mode;     // drives the toggle icon
+		// For explicit choices we can also set the effective theme server-side
+		// (avoids a flash); 'auto' is resolved by JS from the OS preference.
+		if ( $mode === 'dark' )  $classes .= ' dfseo-theme-dark';
+		if ( $mode === 'light' ) $classes .= ' dfseo-theme-light';
+		return $classes;
+	}
+
+	/** Persist the user's theme choice. */
+	public function ajax_set_theme(): void {
+		if ( ! check_ajax_referer( 'dfseo_meta_box', 'nonce', false ) ) wp_send_json_error();
+		$theme = sanitize_key( $_POST['theme'] ?? 'auto' );
+		if ( ! in_array( $theme, [ 'auto', 'light', 'dark' ], true ) ) $theme = 'auto';
+		update_user_meta( get_current_user_id(), 'dfseo_admin_theme', $theme );
+		wp_send_json_success( [ 'theme' => $theme ] );
 	}
 
 	// ─── Menus ──────────────────────────────────────────────────────────────
@@ -149,6 +177,7 @@ class DFSEO_Admin {
 			'restNonce'   => wp_create_nonce( 'wp_rest' ),
 			'nonce'       => wp_create_nonce( 'dfseo_meta_box' ),
 			'postId'      => $post_id,
+			'theme'       => self::current_theme(),
 			'isPremium'   => dfseo_is_premium(),
 			'siteName'    => get_bloginfo( 'name' ),
 			'separator'   => get_option( 'dfseo_separator', '–' ),
@@ -187,19 +216,29 @@ class DFSEO_Admin {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'DadsFam SEO: Licence error — ', 'dadsfam-seo' ) . esc_html( $msg ) . '</p></div>';
 		}
 
-		// Welcome notice
-		if ( ! get_user_meta( $user_id, 'dfseo_dismissed_welcome', true ) ) {
-			$version = (string) get_option( 'dfseo_version', '' );
-			if ( $version === DFSEO_VERSION ) {
-				echo '<div class="notice notice-info dfseo-notice is-dismissible" data-notice="welcome">';
-				echo '<p>' . sprintf(
-					/* translators: %s: link to settings */
-					esc_html__( '👋 Welcome to DadsFam SEO! Start by %sconfiguring your settings%s.', 'dadsfam-seo' ),
-					'<a href="' . esc_url( admin_url( 'admin.php?page=dfseo-settings' ) ) . '">',
-					'</a>'
-				) . '</p>';
-				echo '</div>';
-			}
+		// Welcome notice — only until the plugin is configured or dismissed.
+		// Suppressed automatically once the setup wizard is done, settings have
+		// been saved, or the user dismisses it. The dismiss is handled by an
+		// inline script so it persists on ANY admin page (this notice is global,
+		// but the plugin's main JS only loads on its own screens).
+		$welcome_done = get_user_meta( $user_id, 'dfseo_dismissed_welcome', true )
+			|| get_option( 'dfseo_welcome_dismissed' )
+			|| get_option( 'dfseo_setup_wizard_done' )
+			|| get_option( 'dfseo_settings_saved_once' );
+
+		if ( ! $welcome_done && (string) get_option( 'dfseo_version', '' ) === DFSEO_VERSION ) {
+			$dfseo_dismiss_nonce = wp_create_nonce( 'dfseo_meta_box' );
+			$dfseo_ajax          = admin_url( 'admin-ajax.php' );
+			echo '<div class="notice notice-info is-dismissible dfseo-notice" data-notice="welcome" id="dfseo-welcome-notice">';
+			echo '<p>' . sprintf(
+				/* translators: %s: link to settings */
+				esc_html__( '👋 Welcome to DadsFam SEO! Start by %sconfiguring your settings%s.', 'dadsfam-seo' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=dfseo-settings' ) ) . '">',
+				'</a>'
+			) . '</p>';
+			echo '</div>';
+			// Inline, self-contained dismiss — no dependency on the plugin JS bundle.
+			echo "<script>(function(){var n=document.getElementById('dfseo-welcome-notice');if(!n)return;n.addEventListener('click',function(e){if(!e.target||!e.target.classList.contains('notice-dismiss'))return;var x=new XMLHttpRequest();x.open('POST'," . wp_json_encode( $dfseo_ajax ) . ");x.setRequestHeader('Content-Type','application/x-www-form-urlencoded');x.send('action=dfseo_dismiss_notice&notice=welcome&nonce=" . esc_js( $dfseo_dismiss_nonce ) . "');});})();</script>";
 		}
 	}
 
