@@ -3,7 +3,7 @@
 **Enterprise-grade SEO plugin for WordPress.**  
 On-page analysis, XML sitemaps, structured data, OpenGraph, AI-powered optimization, redirect manager, local SEO, analytics and more.
 
-![DadsFam SEO Dashboard](SEO%20DADSFAM.png)
+![DadsFam SEO Dashboard](SEO%20DADSFAM.PNG)
 
 **Version:** 1.8.5  
 **Author:** DadsFam  
